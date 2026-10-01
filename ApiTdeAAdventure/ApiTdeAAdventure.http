@@ -1,0 +1,6 @@
+@ApiTdeAAdventure_HostAddress = http://localhost:5023
+
+GET {{ApiTdeAAdventure_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

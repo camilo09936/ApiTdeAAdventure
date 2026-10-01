@@ -1,0 +1,44 @@
+using MongoDB.Driver;
+
+namespace ApiTdeAAdventure
+{
+    /// <summary>
+    /// Punto de entrada a la API TdeAAdventure
+    /// </summary>
+    public class Program
+    {
+        /// <summary>
+        /// Configura y ejecuta el host de la API
+        /// </summary>
+        /// <param name="args">Argumentos de la linea de comandos.</param>
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddControllers();
+            builder.Services.AddSwaggerGen(opt =>
+            {
+                string path = Path.Combine(AppContext.BaseDirectory, "api.xml");
+                opt.IncludeXmlComments(path);
+            });
+
+            builder.Services.AddSingleton<IMongoClient>(_ =>
+                new MongoClient(builder.Configuration["MongoDB:ConnectionString"]));
+            builder.Services.AddSingleton<IMongoDatabase>(sp =>
+                sp.GetRequiredService<IMongoClient>()
+                  .GetDatabase(builder.Configuration["MongoDB:DatabaseName"]));
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseAuthorization();
+            app.MapControllers();
+            app.Run();
+        }
+    }
+}

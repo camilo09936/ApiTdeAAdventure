@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ApiTdeAAdventure.Models/ApiTdeAAdventure.Models.csproj" />
+  <Project Path="ApiTdeAAdventure.Query/ApiTdeAAdventure.Query.csproj" />
+  <Project Path="ApiTdeAAdventure.Repository/ApiTdeAAdventure.Repository.csproj" />
+  <Project Path="ApiTdeAAdventure/ApiTdeAAdventure.csproj" />
+</Solution>
