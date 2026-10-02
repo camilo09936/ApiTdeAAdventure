@@ -1,4 +1,8 @@
 using MongoDB.Driver;
+using ApiTdeAAdventure.Query.Implements;
+using ApiTdeAAdventure.Query.Interfaces;
+using ApiTdeAAdventure.Repository.Interfaces;
+using ApiTdeAAdventure.Repository.Implements;
 
 namespace ApiTdeAAdventure
 {
@@ -8,7 +12,7 @@ namespace ApiTdeAAdventure
     public class Program
     {
         /// <summary>
-        /// Configura y ejecuta el host de la API
+        /// Configura y ejecuta el host de la API.
         /// </summary>
         /// <param name="args">Argumentos de la linea de comandos.</param>
         public static void Main(string[] args)
@@ -27,6 +31,9 @@ namespace ApiTdeAAdventure
             builder.Services.AddSingleton<IMongoDatabase>(sp =>
                 sp.GetRequiredService<IMongoClient>()
                   .GetDatabase(builder.Configuration["MongoDB:DatabaseName"]));
+
+            builder.Services.AddTransient<IJugadorQueries, JugadorQueries>();
+            builder.Services.AddTransient<IJugadorRepository, JugadorRepository>();
 
             var app = builder.Build();
 
