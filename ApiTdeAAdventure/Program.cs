@@ -34,6 +34,9 @@ namespace ApiTdeAAdventure
 
             builder.Services.AddTransient<IJugadorQueries, JugadorQueries>();
             builder.Services.AddTransient<IJugadorRepository, JugadorRepository>();
+            // Cosmetico equipado
+            builder.Services.AddTransient<ICosmeticoEquipadoQueries, CosmeticoEquipadoQueries>();
+            builder.Services.AddTransient<ICosmeticoEquipadoRepository, CosmeticoEquipadoRepository>();
 
             var app = builder.Build();
 
