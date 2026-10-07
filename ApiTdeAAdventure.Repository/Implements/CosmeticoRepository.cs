@@ -14,6 +14,7 @@ namespace ApiTdeAAdventure.Repository.Implements
     public class CosmeticoRepository : ICosmeticoRepository
     {
         private readonly IMongoCollection<Cosmetico> _cosmeticos;
+        private readonly IMongoCollection<Jugador> _jugadores;
 
         /// <summary>
         /// Inicializa el repositorio con la base de datos de mongo.
@@ -23,6 +24,7 @@ namespace ApiTdeAAdventure.Repository.Implements
         {
             if (db == null) throw new ArgumentNullException(nameof(db));
             _cosmeticos = db.GetCollection<Cosmetico>("cosmeticos");
+            _jugadores = db.GetCollection<Jugador>("jugadores");
         }
 
         ///<inheritdoc/>
@@ -73,6 +75,32 @@ namespace ApiTdeAAdventure.Repository.Implements
             try
             {
                 await _cosmeticos.DeleteOneAsync(c => c.Id == id);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        ///<inheritdoc/>
+        public async Task<Jugador?> Comprar(string jugadorId, string cosmeticoId)
+        {
+            try
+            {
+                var cosmetico = await _cosmeticos.Find(c => c.Id == cosmeticoId).FirstOrDefaultAsync();
+                if (cosmetico == null)
+                {
+                    return null;
+                }
+                var filtro = Builders<Jugador>.Filter.And(
+                    Builders<Jugador>.Filter.Eq(j => j.Id, jugadorId),
+                    Builders<Jugador>.Filter.Gte(j => j.Monedas, cosmetico.Precio),
+                    Builders<Jugador>.Filter.AnyNe(j => j.CosmeticosDesbloqueados, cosmeticoId));
+                var cambios = Builders<Jugador>.Update
+                    .Inc(j => j.Monedas, -cosmetico.Precio)
+                    .AddToSet(j => j.CosmeticosDesbloqueados, cosmeticoId);
+                var opciones = new FindOneAndUpdateOptions<Jugador> { ReturnDocument = ReturnDocument.After };
+                return await _jugadores.FindOneAndUpdateAsync(filtro, cambios, opciones);
             }
             catch (Exception)
             {

@@ -25,5 +25,10 @@ namespace ApiTdeAAdventure.Repository.Interfaces
 		/// Elimina un cosmético por su id
 		/// </summary>
 		Task Delete(string id);
+
+		/// <summary>
+		/// Procesa la compra de un cosmetico para un jugador descontando monedas y añadiendolo a sus desbloqueados.
+		/// </summary>
+		Task<Jugador?> Comprar(string jugadorId, string cosmeticoId);
 	}
 }

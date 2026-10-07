@@ -52,6 +52,30 @@ namespace ApiTdeAAdventure.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
+        /// <summary>
+        /// Obtiene la tabla de clasificacion global: los 10 mejores jugadores por puntuacion maxima
+        /// </summary>
+        /// <response code="200">Devuelve hasta 10 jugadores con posicion, nombre de usuario y puntuacion maxima.</response>
+        /// <response code="500">Error interno de servidor.</response>
+        [HttpGet("leaderboard")]
+        [ProducesResponseType(typeof(IEnumerable<Leaderboard>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<Leaderboard>>> GetLeaderboard()
+        {
+            try
+            {
+                _logger.LogInformation("Consultando la tabla de clasificacion global");
+                var top = await _query.GetLeaderboard();
+                return Ok(top);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error consultando la tabla de clasificacion");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
         /// <summary>
         /// Obtiene un jugador por su ID
         /// </summary>
@@ -109,6 +133,11 @@ namespace ApiTdeAAdventure.Controllers
                     string.IsNullOrWhiteSpace(jugador.Password))
                 {
                     return BadRequest();
+                }
+                if (jugador.NombreUsuario.Length > 50 || jugador.Email.Length > 100 || jugador.Password.Length > 100 ||
+                    !new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(jugador.Email))
+                {
+                    return BadRequest("Usuario max. 50, email valido max. 100 y contraseña max. 100.");
                 }
                 _logger.LogInformation("Creando jugador {Usuario}", jugador.NombreUsuario);
 
@@ -192,6 +221,11 @@ namespace ApiTdeAAdventure.Controllers
                     return NotFound();
                 }
                 return Ok(rs);
+            }
+            catch (MongoCommandException ex) when (ex.Code == 11000)
+            {
+                //FindOneUpdate reporta el indice unico como MongoCommandException (11000)
+                return Conflict();
             }
             catch (MongoWriteException ex) when (ex.WriteError.Category== ServerErrorCategory.DuplicateKey)
             {

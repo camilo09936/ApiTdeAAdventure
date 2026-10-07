@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 using System.Collections.Generic;
-=======
-﻿using System.Collections.Generic;
->>>>>>> origin/AndresyJuan
 using System.Threading.Tasks;
 using ApiTdeAAdventure.Models;
 
@@ -28,8 +24,4 @@ namespace ApiTdeAAdventure.Query.Interfaces
         /// </summary>
         Task<IEnumerable<Partida>> GetByJugador(string jugadorId);
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> origin/AndresyJuan

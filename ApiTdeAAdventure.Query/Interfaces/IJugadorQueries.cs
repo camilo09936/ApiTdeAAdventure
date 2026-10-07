@@ -25,5 +25,10 @@ namespace ApiTdeAAdventure.Query.Interfaces
         /// Buscar un jugador por usuario y contraseña. Devuelve null si no coincide.
         /// </summary>
         Task<Jugador?> Login(string nombreUsuario, string password);
+
+        /// <summary>
+        /// Obtiene los 10 mejores jugadores ordenados por puntuacion maxima
+        /// </summary>
+        Task<IEnumerable<Leaderboard>> GetLeaderboard();
     }
 }

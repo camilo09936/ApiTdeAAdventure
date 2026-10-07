@@ -14,7 +14,7 @@ namespace ApiTdeAAdventure.Repository.Interfaces
         /// <summary>
         /// Inserta una nueva partida y la devuelve con su id generado
         /// </summary>
-        Task<Partida> Add(Partida partida);
+        Task<Partida?> Add(Partida partida);
 
         /// <summary>
         /// Elimina una partida por su id

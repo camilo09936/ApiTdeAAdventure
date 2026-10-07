@@ -12,6 +12,7 @@ namespace ApiTdeAAdventure.Repository.Implements
     public class CosmeticoEquipadoRepository : ICosmeticoEquipadoRepository
     {
         private readonly IMongoCollection<Jugador> _jugadores;
+        private readonly IMongoCollection<Cosmetico> _cosmeticos;
 
         /// <summary>
         /// Inicializa el repositorio con la base de datos Mongo
@@ -22,6 +23,7 @@ namespace ApiTdeAAdventure.Repository.Implements
             if (db == null) throw new ArgumentNullException(nameof(db));
 
             _jugadores = db.GetCollection<Jugador>("jugadores");
+            _cosmeticos = db.GetCollection<Cosmetico>("cosmeticos");
         }
 
         ///<inheritdoc/>
@@ -29,6 +31,16 @@ namespace ApiTdeAAdventure.Repository.Implements
         {
             try
             {
+                if (cosmetico == null || string.IsNullOrWhiteSpace(cosmetico.CosmeticoId))
+                    return false;
+
+                var infoCosmetico = await _cosmeticos
+                    .Find(c => c.Id == cosmetico.CosmeticoId)
+                    .FirstOrDefaultAsync();
+
+                if (infoCosmetico == null)
+                    return false;
+
                 var jugador = await _jugadores
                     .Find(j => j.Id == jugadorId)
                     .FirstOrDefaultAsync();
@@ -36,23 +48,18 @@ namespace ApiTdeAAdventure.Repository.Implements
                 if (jugador == null)
                     return false;
 
-                if (cosmetico == null)
-                    return false;
-
                 if (!jugador.CosmeticosDesbloqueados.Contains(cosmetico.CosmeticoId))
                     return false;
 
+                cosmetico.Nombre = infoCosmetico.Nombre;
+                cosmetico.Tipo = infoCosmetico.Tipo;
+
                 var filtro = Builders<Jugador>.Filter.Eq(j => j.Id, jugadorId);
+                var actualizacion = Builders<Jugador>.Update.Set(j => j.CosmeticoEquipado, cosmetico);
 
-                var actualizacion = Builders<Jugador>.Update
-                    .Set(j => j.CosmeticoEquipado, cosmetico);
+                var resultado = await _jugadores.UpdateOneAsync(filtro, actualizacion);
 
-                var resultado = await _jugadores.UpdateOneAsync(
-                    filtro,
-                    actualizacion
-                );
-
-                return resultado.ModifiedCount > 0;
+                return resultado.MatchedCount > 0;
             }
             catch (Exception)
             {
@@ -66,16 +73,11 @@ namespace ApiTdeAAdventure.Repository.Implements
             try
             {
                 var filtro = Builders<Jugador>.Filter.Eq(j => j.Id, jugadorId);
+                var actualizacion = Builders<Jugador>.Update.Set(j => j.CosmeticoEquipado, null);
 
-                var actualizacion = Builders<Jugador>.Update
-                    .Set(j => j.CosmeticoEquipado, null);
+                var resultado = await _jugadores.UpdateOneAsync(filtro, actualizacion);
 
-                var resultado = await _jugadores.UpdateOneAsync(
-                    filtro,
-                    actualizacion
-                );
-
-                return resultado.ModifiedCount > 0;
+                return resultado.MatchedCount > 0;
             }
             catch (Exception)
             {

@@ -65,5 +65,35 @@ namespace ApiTdeAAdventure.Query.Implements
                 throw;
             }
         }
+
+        ///<inheritdoc/>
+        public async Task<IEnumerable<Leaderboard>> GetLeaderboard()
+        {
+            try
+            {
+                //Usa el indice puntuacion_maxima_-1
+                var top = await _jugadores
+                    .Find(_ => true)
+                    .SortByDescending(j => j.PuntuacionMaxima)
+                    .Limit(10)
+                    .Project(j => new Leaderboard
+                    {
+                        NombreUsuario = j.NombreUsuario,
+                        PuntuacionMaxima = j.PuntuacionMaxima
+                    })
+                    .ToListAsync();
+
+                //La posicion no se guarda en Mongo: se calcula segun el orden
+                for (int i = 0; i < top.Count; i++)
+                {
+                    top[i].Posicion = i + 1;
+                }
+                return top;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
     }
 }
